@@ -5,17 +5,25 @@ import TcpSocket from 'react-native-tcp-socket';
 export default function MainScreen() {
     const [led, setLed] = useState(0);
 
-    const client = TcpSocket.createConnection(
+    const [client, setClient] = useState(TcpSocket.createConnection(
         {host: '192.168.4.1', port: 80}, 
         () => {
             client.write('Hello World\r\n');
         }
-    );
+    ));
 
     const ledPress = () => {
         if (client.readyState == 'open') {
             client.write(led == 0 ? 'LED:ON\r\n' : led == 1 ? 'LED:AUTO\r\n' : 'LED:OFF\r\n');
             setLed((led + 1) % 3);
+        } else {
+            client.destroy();
+            setClient(TcpSocket.createConnection(
+                {host: '192.168.4.1', port: 80}, 
+                () => {
+                    client.write('Hello World\r\n');
+                }
+            ));
         }
 
         // fetch("http://192.168.117.1:8081/", {
